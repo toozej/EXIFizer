@@ -62,28 +62,32 @@ if [ -e "$exif_file" ]; then
     done < "${exif_file}"
 else
     echo "File containing EXIF data ${exif_file} not found."
-    exit
+    exit 1
 fi
 
+# roll_num is a unique identifier per roll of film
+# all photos of a roll should be stored in one directory named numerically
+# and stripped of any prefixed/padded "0" characters
 roll_num=$(basename "${folder_path}" | sed 's/^0*//')
 
+# keep track of which shot we're on
+# to be used later to fake the timestamp such that photos show up in chronological
+# order on a timeline-driven photos app
 file_counter=0
+
 # Loop through each JPG file in the folder
 for file in "$folder_path"/*.jpg; do
     ((file_counter++))
+
     # Use exiftool to extract the scanner make and model
     scanner_make=$(exiftool -s -s -s -Make "$file")
     scanner_model=$(exiftool -s -s -s -Model "$file")
 
-    # Replace scanner make and model with camera make and model
-    exiftool -overwrite_original \
+    # Set our metadata using exiftool, quietly and ignoring minor errors
+    # Additional / non-standard fields from https://github.com/thetestspecimen/film-exif
+    exiftool -q -m -overwrite_original \
         -Make="$camera_make" \
         -Model="$camera_model" \
-        "$file"
-
-    # Set the additional metadata tags
-    # Additional / non-standard fields from https://github.com/thetestspecimen/film-exif
-    exiftool -m -overwrite_original \
         -Lens="$lens" \
         -Location="$location" \
         -XMP-AnalogueData:FilmStock="$film_stock" \
@@ -98,5 +102,5 @@ for file in "$folder_path"/*.jpg; do
         "$file"
 done
 
-echo "Metadata extraction, modification, and tagging complete!"
+echo "Metadata tagging complete on RollNum ${roll_num}!"
 

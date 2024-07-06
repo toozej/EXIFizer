@@ -1,0 +1,9 @@
+Camera=Minolta SR-T101 black
+Lens=135mm f/2.8
+Location=Abiquiu (Plaza Blanca and Ghost Ranch), NM
+Film=Kodak Professional Ektar 100
+ISO=100
+Exposures=36
+MajorityShotDate=2024/05/27
+Developed=Citizens Photo, Portland, Oregon
+DevelopedDate=2024/07/01

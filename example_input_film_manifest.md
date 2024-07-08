@@ -1,0 +1,24 @@
+- Filmstock: Kodak Professional Ektar 100
+    - ISO: 100
+    - Exposures: 36
+    - Expiration: 05/2025
+    - Loaded Date: 5/27/24
+    - Camera: Minolta SR-T101 black
+    - Lens: 135mm f2.8
+    - Shot Location: Abiquiu (Plaza Blanca and Ghost Ranch), NM 
+    - Ready for Development Date: 5/28/24
+    - Developed Date: 7/1/24
+    - Developed Location: Citizens PDX
+    - RollNum: 2569
+- Filmstock: Fujifilm 200
+    - ISO: 200
+    - Exposures: 36
+    - Expiration: 07/2025
+    - Loaded Date: 5/27/24
+    - Camera: Minolta SR-T101 black
+    - Lens: 28mm f2.5
+    - Shot Location: Abiquiu and Taos, NM
+    - Ready for Development Date: 5/30/24
+    - Developed Date: 7/1/24
+    - Developed Location: Citizens PDX
+    - RollNum: 2579

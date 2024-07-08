@@ -1,0 +1,14 @@
+---
+version: "3"
+services:
+  exifizer:
+    container_name: exifizer
+    image: toozej/exifizer:latest
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=false"
+    volumes:
+      - "./example_input_film_manifest.md:/film_manifest.md"
+      - "$HOME/Pictures/Film Scans:/photos"
+    command:
+      ["python3", "./exifizer.py", "--film-manifest", "/film_manifest.md", "--images-dir", "/photos"]

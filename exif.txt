@@ -1,9 +1,0 @@
-Camera=Nikon N80
-Lens=50mm f/1.8
-Location=Somewhere, ST
-Film=Ilford HP5+
-ISO=1600
-Exposures=36
-MajorityShotDate=2023/09/12
-Developed=Some Lab, Somewhere, ST
-DevelopedDate=2023/10/12

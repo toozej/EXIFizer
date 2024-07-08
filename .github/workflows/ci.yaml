@@ -1,0 +1,83 @@
+---
+name: CI
+'on':
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - pre-commits
+  schedule:
+    - cron: "0 1 * * 1"
+
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+      -
+        name: Run pre-commit
+        run: |
+          pip install setuptools pre-commit
+          pre-commit run --all-files
+
+  docker:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - context: ./
+            tags: |
+              toozej/exifizer:latest
+              ghcr.io/toozej/exifizer:latest
+              quay.io/toozej/exifizer:latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v3
+        # https://docs.docker.com/docker-hub/access-tokens/
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_GHCR_TOKEN }}
+      -
+        name: Login to Quay Container Registry
+        uses: docker/login-action@v3
+        # https://github.com/marketplace/actions/push-to-registry#examples
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          tags: ${{ matrix.tags }}
+          platforms: linux/amd64
+          push: true

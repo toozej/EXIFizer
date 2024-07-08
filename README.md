@@ -2,47 +2,39 @@
 
 A bulk EXIF data tagging tool for analog / film photography.
 
-## Pre-reqs
-1. Install EXIFTool (and curl for downloading EXIFizer)
+## Pre-Reqs
+1. Install Python 3.12 or higher (may work with older versions, but not tested)
+
+2. Install EXIFTool (and curl for downloading EXIFizer)
 https://exiftool.org/
 ```
-sudo dnf install -y perl-Image-ExifTool curl
+brew install exiftool curl || sudo dnf install -y perl-Image-ExifTool curl || sudo apt-get install -y libimage-exiftool-perl curl
 ```
 
-2. Ensure you have a `~/.ExifTool_config` file
+3. Ensure you have a `~/.ExifTool_config` file
 ```
 curl -sLo ~/.ExifTool_config https://raw.githubusercontent.com/toozej/EXIFizer/main/.ExifTool_config
 ```
 
-3. Grab a copy of EXIFizer to your $bin directory
+4. Grab a copy of EXIFizer to your $bin directory
 ```
-curl -sLo ~/bin/exifizer https://raw.githubusercontent.com/toozej/EXIFizer/main/exifizer
+curl -sLo ~/bin/exifizer https://raw.githubusercontent.com/toozej/EXIFizer/main/exifizer.py
 ```
 
-4. Put your scanned photos in numerically named directories (like "00004423")
+5. Put your scanned photos in numerically named directories (like "00004423")
 
 ## Usage
-1. Put a file `exif.txt` like the following in each directory of scanned photos
-```
-Camera=Nikon N80
-Lens=50mm f/1.8
-Location=Somewhere, ST
-Film=Ilford HP5+
-ISO=1600
-Exposures=36
-MajorityShotDate=2023/09/12
-Developed=Some Lab, Somewhere, ST
-DevelopedDate=2023/10/12
-```
+1. Put a file `film_manifest.md` in a known location. See `example_input_film_manifest.md` for an example
 
-2. Run EXIFizer against a directory of scanned photos
-```
-exifizer path/to/dir/of/scanned/photos/$rollnum
-```
+2. Organize your images directories in one of two ways:
+   - Directory name: `0000XXXX/` where XXXX is a 4-digit RollNum
+     Image name: `0000XXXX000YY.jpg` where XXXX is a 4-digit RollNum, and YY is a zero-padded PhotoNum (1-36ish)
+   - Directory name: `roll_XXXX` where XXXX is a 4-digit RollNum
+     Image name: `XXXX_YY.tif` where XXXX is a 4-digit RollNum, and YY is a non-zero-padded PhotoNum (1-36ish)
 
-3. MEGA EXIFizer (Run EXIFizer against a whole bunch of directories)
+3. Run EXIFizer against a directory of images with a film manifest file
 ```
-find path/to/base/dir/of/scanned/photos -type d -exec exifizer {} \;
+exifizer --film-manifest path/to/film_manifest.md --images-dir path/to/dir/of/images/
 ```
 
 ## Inspiration / Credits

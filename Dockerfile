@@ -10,9 +10,6 @@ RUN useradd -ms /bin/bash appuser
 USER appuser
 WORKDIR /app
 
-COPY --chown=appuser:appuser requirements.txt .
-RUN pip3 install --user -r requirements.txt
-
 ENV PATH="/home/appuser/.local/bin:${PATH}"
 
 COPY --chown=appuser:appuser ./exifizer.py .

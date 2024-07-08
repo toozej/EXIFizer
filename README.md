@@ -21,8 +21,6 @@ curl -sLo ~/.ExifTool_config https://raw.githubusercontent.com/toozej/EXIFizer/m
 curl -sLo ~/bin/exifizer https://raw.githubusercontent.com/toozej/EXIFizer/main/exifizer.py
 ```
 
-5. Put your scanned photos in numerically named directories (like "00004423")
-
 ## Usage
 1. Put a file `film_manifest.md` in a known location. See `example_input_film_manifest.md` for an example
 

@@ -4,6 +4,7 @@ import argparse
 import os
 import re
 import subprocess
+import sys
 from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import multiprocessing
@@ -226,9 +227,11 @@ def get_original_make_model(filepath):
         model = result.stdout.split("\n")[1].strip()
         if VERBOSE:
             print(f"Found scanner make {make} and model {model}")
-    except:
-        print("Exception when finding scanner make and model")
-    return (make if make else "Unknown", model if model else "Unknown")
+    except UnboundLocalError:
+        print(f"Unable to find scanner make and model on image {filepath}. Setting to 'Unknown'")
+        make = "Unknown Make"
+        model = "Unknown Model"
+    return (make, model)
 
 
 def write_exif_file(film_roll, filepath):
@@ -298,13 +301,13 @@ def main():
         print(
             "Film manifest file is not a Markdown file, are you sure you entered the correct path? Exiting..."
         )
-        exit(1)
+        sys.exit(1)
     images_directory = args.images_dir  # Path to the directory with image files
     if not os.path.isdir(images_directory):
         print(
             "Images directory is not a directory, are you sure you entered the correct path? Exiting..."
         )
-        exit(2)
+        sys.exit(2)
     global VERBOSE
     VERBOSE = args.verbose or False
     print(

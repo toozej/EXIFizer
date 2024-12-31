@@ -1,6 +1,6 @@
 # non-root user example <https://medium.com/@DahlitzF/run-python-applications-as-non-root-user-in-docker-containers-by-example-cba46a0ff384>
 
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 RUN pip install --upgrade pip && \
     apt-get update -qq && \

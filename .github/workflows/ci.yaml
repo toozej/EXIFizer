@@ -22,7 +22,7 @@ jobs:
         name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.13'
       -
         name: Run pre-commit
         run: |
@@ -80,3 +80,11 @@ jobs:
           tags: ${{ matrix.tags }}
           platforms: linux/amd64
           push: true
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1

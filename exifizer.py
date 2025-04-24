@@ -22,8 +22,8 @@ def read_markdown_file(filepath):
     Returns:
         str: Content of the markdown file as a string.
     """
-    with open(filepath) as file:
-        return file.read()
+    with open(filepath, encoding="utf-8") as f:
+        return f.read()
 
 
 def parse_markdown(markdown_content):
@@ -62,6 +62,8 @@ def parse_markdown(markdown_content):
                 current_roll["Camera"] = re.search(r"Camera: (.+)", line).group(1).strip()
             elif "Lens:" in line:
                 current_roll["Lens"] = re.search(r"Lens: (.+)", line).group(1).strip()
+            elif "Filter:" in line:
+                current_roll["Filter"] = re.search(r"Filter: (.+)", line).group(1).strip()
             elif "Shot Location:" in line:
                 current_roll["ShotLocation"] = (
                     re.search(r"Shot Location: (.+)", line).group(1).strip()
@@ -143,6 +145,7 @@ def apply_exif_data(rolls, image_directory):
                             photo_number = int(roll_num_match.group(4))
                         else:
                             print(f"ERROR: file naming convention unknown for file {file}")
+                            break
 
                         for roll in reversed(rolls):
                             if roll["RollNum"] == roll_num:
@@ -165,16 +168,17 @@ def apply_exif_data(rolls, image_directory):
                                     "-overwrite_original",
                                     f"-Make={camera_make}",
                                     f"-Model={camera_model}",
-                                    f'-Lens={roll["Lens"]}',
-                                    f'-Location={roll["ShotLocation"]}',
-                                    f'-XMP-AnalogueData:FilmStock={roll["FilmStock"]}',
+                                    f"-Lens={roll['Lens']}",
+                                    f"-Location={roll['ShotLocation']}",
+                                    f"-XMP-AnalogueData:Filter={roll['Filter']}",
+                                    f"-XMP-AnalogueData:FilmStock={roll['FilmStock']}",
                                     "-XMP-AnalogueData:FilmFormat=35mm",
                                     "-XMP-AnalogueData:FilmDeveloper=Unknown",
-                                    f'-XMP-AnalogueData:FilmProcessLab={roll["DevelopedBy"]}',
+                                    f"-XMP-AnalogueData:FilmProcessLab={roll['DevelopedBy']}",
                                     f"-XMP-AnalogueData:FilmScanner={scanner_make} {scanner_model}",
-                                    f'-XMP-AnalogueData:FilmProcessedDate={roll["FilmProcessedDate"]}',
-                                    f'-XMP-AnalogueData:RollNum={roll["RollNum"]}',
-                                    f'-ISO={roll["ISO"]}',
+                                    f"-XMP-AnalogueData:FilmProcessedDate={roll['FilmProcessedDate']}",
+                                    f"-XMP-AnalogueData:RollNum={roll['RollNum']}",
+                                    f"-ISO={roll['ISO']}",
                                     f"-DateTimeOriginal={date}",
                                     os.path.join(root, file),
                                 ]
@@ -204,7 +208,7 @@ def run_exiftool_cmd(cmd):
     Returns:
         None
     """
-    subprocess.run(cmd)
+    subprocess.run(cmd, check=False)
 
 
 def get_original_make_model(filepath):
@@ -222,12 +226,13 @@ def get_original_make_model(filepath):
             ["exiftool", "-s", "-s", "-s", "-Make", "-Model", filepath],
             capture_output=True,
             text=True,
+            check=False,
         )
         make = result.stdout.split("\n")[0].strip()
         model = result.stdout.split("\n")[1].strip()
         if VERBOSE:
             print(f"Found scanner make {make} and model {model}")
-    except UnboundLocalError:
+    except (IndexError, UnboundLocalError):
         print(f"Unable to find scanner make and model on image {filepath}. Setting to 'Unknown'")
         make = "Unknown Make"
         model = "Unknown Model"
@@ -245,9 +250,10 @@ def write_exif_file(film_roll, filepath):
     Returns:
         None
     """
-    with open(filepath, "w") as file:
+    with open(filepath, "w", encoding="utf-8") as file:
         file.write(f"Camera={film_roll['Camera']}\n")
         file.write(f"Lens={film_roll['Lens']}\n")
+        file.write(f"Filter={film_roll['Filter']}\n")
         file.write(f"Film={film_roll['FilmStock']}\n")
         file.write(f"ISO={film_roll['ISO']}\n")
         file.write(f"MajorityShotDate={film_roll['LoadDate']}\n")
@@ -269,7 +275,7 @@ def is_markdown_file(filepath):
     """
     if not filepath.lower().endswith(".md"):
         return False
-    with open(filepath) as file:
+    with open(filepath, encoding="utf-8") as file:
         first_line = file.readline().strip()
         return first_line.startswith("#") or first_line.startswith("-")
 

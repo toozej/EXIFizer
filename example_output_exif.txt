@@ -1,5 +1,6 @@
 Camera=Minolta SR-T101 black
 Lens=135mm f/2.8
+Filter=None
 Location=Abiquiu (Plaza Blanca and Ghost Ranch), NM
 Film=Kodak Professional Ektar 100
 ISO=100

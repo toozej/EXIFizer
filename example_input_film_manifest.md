@@ -5,6 +5,7 @@
     - Loaded Date: 5/27/24
     - Camera: Minolta SR-T101 black
     - Lens: 135mm f2.8
+    - Filter: None
     - Shot Location: Abiquiu (Plaza Blanca and Ghost Ranch), NM 
     - Ready for Development Date: 5/28/24
     - Developed Date: 7/1/24
@@ -17,6 +18,7 @@
     - Loaded Date: 5/27/24
     - Camera: Minolta SR-T101 black
     - Lens: 28mm f2.5
+    - Filter: Red
     - Shot Location: Abiquiu and Taos, NM
     - Ready for Development Date: 5/30/24
     - Developed Date: 7/1/24

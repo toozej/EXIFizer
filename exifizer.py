@@ -104,6 +104,28 @@ def parse_markdown(markdown_content):
     return film_rolls
 
 
+def remove_thm_files(image_directory):
+    """
+    Removes .thm files from image directory
+
+    Args:
+        image_directory (str): Path to the directory with image files.
+
+    Returns:
+        None
+    """
+    for root, dirs, files in os.walk(image_directory):
+        for filename in files:
+            if filename.endswith(".thm"):
+                file_path = os.path.join(root, filename)
+                try:
+                    os.remove(file_path)
+                    if VERBOSE:
+                        print(f"Removed: {file_path}")
+                except OSError as e:
+                    print(f"Error removing {file_path}: {e}")
+
+
 def apply_exif_data(rolls, image_directory):
     """
     Applies EXIF data to image files in a directory based on film roll information.
@@ -121,6 +143,8 @@ def apply_exif_data(rolls, image_directory):
             if VERBOSE:
                 print(f"DEBUG: Working on dir: {root}")
             for file in files:
+                if VERBOSE:
+                    print(f"DEBUG: Working on file: {file}")
                 # file naming conventions:
                 # 1. `0000XXXX000YY.jpg` where XXXX is a 4-digit RollNum, and YY is a zero-padded PhotoNum (1-36ish)
                 # 2. `XXXX_YY.tif` where XXXX is a 4-digit RollNum, and YY is a non-zero-padded PhotoNum (1-36ish)
@@ -129,10 +153,10 @@ def apply_exif_data(rolls, image_directory):
                     if roll_num_match:
                         # handle file naming convention #1
                         if roll_num_match.group(1):
-                            roll_num = roll_num_match.group(1).lstrip("0000")
+                            roll_num = roll_num_match.group(1).lstrip("0000").zfill(4)
                         # handle file naming convention #2
                         elif roll_num_match.group(3):
-                            roll_num = roll_num_match.group(3).strip()
+                            roll_num = roll_num_match.group(3).strip().zfill(4)
                         else:
                             print(f"ERROR: file naming convention unknown for file {file}")
                             continue
@@ -147,7 +171,14 @@ def apply_exif_data(rolls, image_directory):
                             print(f"ERROR: file naming convention unknown for file {file}")
                             break
 
+                        if VERBOSE:
+                            print(
+                                f"DEBUG: file {file} assigned roll_num {roll_num} and photo_number {photo_number}"
+                            )
+
                         for roll in reversed(rolls):
+                            if VERBOSE:
+                                print(f"DEBUG: roll {roll['RollNum']} and roll_num is {roll_num}")
                             if roll["RollNum"] == roll_num:
                                 camera_make, camera_model = roll["Camera"].split(" ", 1)
                                 scanner_make, scanner_model = get_original_make_model(
@@ -323,6 +354,7 @@ def main():
     # Run the program with validated arguments
     markdown_content = read_markdown_file(markdown_filepath)
     film_rolls = parse_markdown(markdown_content)
+    remove_thm_files(images_directory)
     apply_exif_data(film_rolls, images_directory)
 
 

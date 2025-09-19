@@ -11,6 +11,8 @@
     GROUPS => { 0 => 'XMP', 1 => 'XMP-AnalogueData', 2 => 'Film' },
     NAMESPACE => { 'AnalogueData' => 'https://filmgra.in/AnalogueData/1.0/' },
     WRITABLE => 'string',
+    Subject => { },
+    Notes => { },
     Filter => { },
     FilmStock => { },
     FilmFormat => { },

@@ -11,19 +11,29 @@ IMAGE_AUTHOR = toozej
 IMAGE_NAME = exifizer
 IMAGE_TAG = latest
 
-.PHONY: all build run local-run update-python-version pre-commit pre-commit-install pre-commit-run clean help
+.PHONY: all build test run local-run get-cosign-pub-key verify update-python-version pre-commit pre-commit-install pre-commit-run clean help
 
-all: build run ## Run default workflow
+all: build run verify ## Run default workflow
 
 build: ## Build Dockerized project
 	docker build -f $(CURDIR)/Dockerfile -t $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG) .
+
+test: ## Test Dockerized project
+	docker build --target test -f $(CURDIR)/Dockerfile -t $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG) .
 
 run: ## Run Dockerized project
 	-docker kill $(IMAGE_NAME)
 	docker run --rm --name $(IMAGE_NAME) $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 local-run: ## Run Python project locally
+	python3 -m venv venv && source $(CURDIR)/venv/bin/activate && pip install -r $(CURDIR)/requirements.txt
 	python3 $(CURDIR)/exifizer.py --help
+
+get-cosign-pub-key: ## Get golang-starter Cosign public key from GitHub
+	test -f $(CURDIR)/exifizer.pub || curl --silent https://raw.githubusercontent.com/toozej/exifizer/main/exifizer.pub -O
+
+verify: get-cosign-pub-key ## Verify Docker image with Cosign
+	cosign verify --key $(CURDIR)/exifizer.pub $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 update-python-version: ## Update Python version
 	@VERSION=`curl -s "https://endoflife.date/api/python.json" | jq -r '.[0].latest' | sed 's/\.[0-9]*$$//'`; \

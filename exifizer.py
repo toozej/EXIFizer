@@ -128,6 +128,12 @@ def parse_markdown(markdown_content):
 
             elif "Lens:" in line:
                 current_roll["Lens"] = safe_regex_extract(r"Lens: (.+)", line)
+                # Extract only the focal length (digits before "mm") from the Lens string
+                lens_str = current_roll.get("Lens", "")
+                focal_length_match = re.search(r"(\d+)\s*mm", lens_str)
+                current_roll["FocalLength"] = (
+                    focal_length_match.group(1) if focal_length_match else "Unknown"
+                )
 
             elif "Filter:" in line:
                 current_roll["Filter"] = safe_regex_extract(r"Filter: (.+)", line)
@@ -374,6 +380,7 @@ def apply_exif_data(rolls, image_directory):
                             f"-Make={camera_make}",
                             f"-Model={camera_model}",
                             f"-LensModel={matching_roll['Lens']}",
+                            f"-FocalLength={matching_roll['FocalLength']}",
                             f"-ISO={matching_roll['ISO']}",
                             f"-DateTimeOriginal={date}",
                             # Location (shows in Google Photos)
@@ -382,7 +389,7 @@ def apply_exif_data(rolls, image_directory):
                             f"-City={matching_roll['ShotLocation']}",
                             # Subject and description (shows in Google Photos)
                             f"-Subject={matching_roll['Subject']}",
-                            f"-Description={matching_roll['Notes']}",
+                            f"-Description={matching_roll['FilmStock']} {matching_roll['ISO']}",
                             f"-ImageDescription={matching_roll['Notes']}",
                             f"-Caption-Abstract={matching_roll['Notes']}",
                             # Keywords for better organization (shows in Google Photos)
@@ -391,8 +398,8 @@ def apply_exif_data(rolls, image_directory):
                             f"-Keywords={camera_make} {camera_model}",
                             f"-Keywords=Roll {matching_roll['RollNum']}",
                             # Copyright and creator info (shows in Google Photos)
-                            "-Artist=Film Photographer",
-                            "-Copyright=© Film Photography Collection",
+                            "-Artist=James Tooze",
+                            f"-Copyright=© {str(datetime.today().year)} James Tooze",
                             # Film-specific metadata in XMP namespace
                             f"-XMP-AnalogueData:Filter={matching_roll['Filter']}",
                             f"-XMP-AnalogueData:FilmStock={matching_roll['FilmStock']}",

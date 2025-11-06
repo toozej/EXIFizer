@@ -274,13 +274,13 @@ def generate_photo_datetime(load_date_str, photo_number):
     try:
         if load_date_str == "Unknown":
             # Use a default date if load date is unknown
-            return f"1900:01:01 {photo_number:02}:00:00"
+            return f"1900:01:01 00:{photo_number:02}:00"
 
         date_base = datetime.strptime(load_date_str, "%m/%d/%y")
-        return f"{date_base.strftime('%Y:%m:%d')} {photo_number:02}:00:00"
+        return f"{date_base.strftime('%Y:%m:%d')} 00:{photo_number:02}:00"
     except ValueError as e:
         print(f"Error generating datetime for load date '{load_date_str}': {e}")
-        return f"1900:01:01 {photo_number:02}:00:00"
+        return f"1900:01:01 00:{photo_number:02}:00"
 
 
 def apply_exif_data(rolls, image_directory):

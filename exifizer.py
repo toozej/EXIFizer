@@ -389,7 +389,7 @@ def apply_exif_data(rolls, image_directory):
                             f"-City={matching_roll['ShotLocation']}",
                             # Subject and description (shows in Google Photos)
                             f"-Subject={matching_roll['Subject']}",
-                            f"-Description={matching_roll['FilmStock']} {matching_roll['ISO']}",
+                            f"-Description={matching_roll['FilmStock']} @ ISO {matching_roll['ISO']}",
                             f"-ImageDescription={matching_roll['Notes']}",
                             f"-Caption-Abstract={matching_roll['Notes']}",
                             # Keywords for better organization (shows in Google Photos)
@@ -469,14 +469,37 @@ def run_exiftool_cmd(cmd, filename="unknown"):
 def get_original_make_model(filepath):
     """
     Retrieves the original scanner make and model of an image file using exiftool.
-
+    If the 'FilmScanner' EXIF field is already set, it returns that value instead.
     Args:
         filepath (str): Path to the image file.
-
     Returns:
         tuple: A tuple containing the make and model of the scanner.
     """
     try:
+        # First, check if the FilmScanner tag is already set
+        film_scanner_cmd = [
+            "exiftool",
+            "-s",
+            "-s",
+            "-s",
+            "-XMP-AnalogueData:FilmScanner",
+            filepath,
+        ]
+        scanner_result = subprocess.run(
+            film_scanner_cmd, capture_output=True, text=True, check=False, timeout=10
+        )
+
+        if scanner_result.returncode == 0 and scanner_result.stdout.strip():
+            scanner_info = scanner_result.stdout.strip()
+            if VERBOSE:
+                print(f"FilmScanner tag already set to '{scanner_info}' for {filepath}")
+            # Split the scanner info into make and model
+            parts = scanner_info.split(" ", 1)
+            make = parts[0] if parts else "Unknown Make"
+            model = parts[1] if len(parts) > 1 else "Unknown Model"
+            return make, model
+
+        # If FilmScanner tag is not set, get Make and Model
         result = subprocess.run(
             ["exiftool", "-s", "-s", "-s", "-Make", "-Model", filepath],
             capture_output=True,

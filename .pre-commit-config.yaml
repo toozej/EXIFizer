@@ -50,6 +50,12 @@ repos:
       - id: check-hooks-apply
       - id: check-useless-excludes
 
+  # lint GitHub Actions workflows
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.7.10
+    hooks:
+      - id: actionlint
+
   # Python Linter, Code Style, Error and Complexity Checker, and Formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.8

@@ -58,7 +58,7 @@ repos:
 
   # Python Linter, Code Style, Error and Complexity Checker, and Formatter
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.14.8
+    rev: v0.14.14
     hooks:
       - id: ruff
         args: ["--fix", "--ignore", "E501,E203,E231,E722,C901"]
@@ -73,7 +73,7 @@ repos:
         args: ["--min-confidence", "80", "exifizer.py", "scripts/catalog_format_converter/"]
 
   - repo: https://github.com/PyCQA/bandit
-    rev: 1.9.2
+    rev: 1.9.3
     hooks:
       - id: bandit
         args: ["-iii", "-lll", "-q"]

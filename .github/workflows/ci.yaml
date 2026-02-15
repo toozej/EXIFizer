@@ -15,15 +15,12 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13', '3.14']
+        python-version: ['3.11', '3.12', '3.13', '3.14']
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.26'
-          check-latest: true
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
@@ -57,13 +54,9 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.25'
-          check-latest: true
       - uses: github/codeql-action/init@v4 # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
         with:
-          languages: go
+          languages: python
       - uses: github/codeql-action/autobuild@v4 # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
       - uses: github/codeql-action/analyze@v4 # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
 
@@ -83,20 +76,17 @@ jobs:
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
 
-  snyk:
-    name: snyk
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: snyk/actions/setup@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
-      - uses: actions/setup-go@v6
-        with:
-          go-version: '^1.26'
-          check-latest: true
-      - name: Snyk monitor
-        run: snyk test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # snyk:
+  #   name: snyk
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #     - uses: snyk/actions/setup@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
+  #     - name: Snyk monitor
+  #       run: snyk test --all-projects
+  #       env:
+  #         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+  # TODO: Re-enable once snyk supports Python with uv - https://github.com/snyk/snyk-python-plugin/issues/251
 
   workflow-keepalive:
     if: github.event_name == 'schedule'

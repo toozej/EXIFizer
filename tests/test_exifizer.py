@@ -323,18 +323,17 @@ class TestRunExiftoolCmd:
         exifizer.run_exiftool_cmd(cmd, "test.jpg")
 
     @patch("exifizer.subprocess.run")
+    @patch("exifizer.VERBOSE", True)
     def test_run_exiftool_cmd_non_zero_exit(self, mock_run, capsys):
         import subprocess
 
         mock_run.return_value = subprocess.CompletedProcess(
             args=[], returncode=1, stdout="", stderr="error"
         )
-        exifizer.VERBOSE = True
         cmd = ["exiftool", "test.jpg"]
         exifizer.run_exiftool_cmd(cmd, "test.jpg")
         captured = capsys.readouterr()
         assert "Warning" in captured.out
-        exifizer.VERBOSE = False
 
     @patch("exifizer.subprocess.run")
     def test_run_exiftool_cmd_exception(self, mock_run, capsys):

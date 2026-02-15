@@ -1,0 +1,119 @@
+---
+name: release
+'on':
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 1 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-push-amd64:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - context: ./
+            tags: |
+              toozej/exifizer:latest
+              ghcr.io/toozej/exifizer:latest
+              quay.io/toozej/exifizer:latest
+            platform: linux/amd64
+    steps: &build-steps
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        # https://docs.docker.com/docker-hub/access-tokens/
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        # https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GH_GHCR_TOKEN }}
+      - name: Login to Quay Container Registry
+        uses: docker/login-action@v3
+        # https://github.com/marketplace/actions/push-to-registry#examples
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_TOKEN }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          tags: ${{ matrix.tags }}
+          platforms: ${{ matrix.platform }}
+          push: true
+
+  trivy-scan-image-amd64:
+    name: trivy-scan-image
+    needs: [build-and-push-amd64]
+    runs-on: ubuntu-24.04
+    permissions:
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tags: |
+              toozej/exifizer:latest
+              ghcr.io/toozej/exifizer:latest
+              quay.io/toozej/exifizer:latest
+    steps: &scan-image-steps
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master # nosemgrep: yaml.github-actions.security.third-party-action-not-pinned-to-commit-sha.third-party-action-not-pinned-to-commit-sha
+        with:
+          image-ref: ${{ matrix.tags }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+
+  build-and-push-arm64:
+    runs-on: ubuntu-24.04-arm
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - context: ./
+            tags: |
+              toozej/exifizer:latest
+              ghcr.io/toozej/exifizer:latest
+              quay.io/toozej/exifizer:latest
+            platform: linux/arm64
+    steps: *build-steps
+
+  trivy-scan-image-arm64:
+    name: trivy-scan-image
+    needs: [build-and-push-arm64]
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tags: |
+              toozej/exifizer:latest
+              ghcr.io/toozej/exifizer:latest
+              quay.io/toozej/exifizer:latest
+    steps: *scan-image-steps

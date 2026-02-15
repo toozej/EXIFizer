@@ -1,0 +1,22 @@
+{
+  "name": "python-starter",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "target": "base"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.terminal.activateEnvironment": true
+      },
+      "extensions": [
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "astral-sh.ty"
+      ]
+    }
+  },
+  "postCreateCommand": "uv --version && uv sync --all-groups && pre-commit install",
+  "remoteUser": "appuser"
+}
+

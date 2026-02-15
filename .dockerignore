@@ -14,3 +14,7 @@ docker-compose.yml
 *.key
 *.out
 example*
+.venv
+venv/
+.ruff_cache/
+.uv/

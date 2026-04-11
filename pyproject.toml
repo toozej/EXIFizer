@@ -2,7 +2,7 @@
 # and enable modern packaging (PEP 621).
 
 [build-system]
-requires = ["hatchling>=1.27.0"]
+requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"
 
 [project]

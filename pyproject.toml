@@ -42,7 +42,7 @@ exifizer = "exifizer:main"
 # uv dependency groups (PEP 735-style). uv consumes these directly.
 [dependency-groups]
 test = [
-  "pytest>=9.0.0",
+  "pytest>=9.0.3",
   "pytest-xdist>=2.2.1",
 ]
 lint = [

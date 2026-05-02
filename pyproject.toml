@@ -52,7 +52,7 @@ lint = [
   "pyupgrade>=3.21.0",
 ]
 dev = [
-  "pre-commit>=4.0.0",
+  "pre-commit>=4.6.0",
 ]
 
 [tool.ruff]

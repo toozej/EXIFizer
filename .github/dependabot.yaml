@@ -1,5 +1,14 @@
 ---
 version: 2
+multi-ecosystem-groups:
+  combined:
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
 updates:
   - package-ecosystem: "uv"
     directory: "/"
@@ -13,7 +22,9 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-
+    patterns:
+      - "*"
+    multi-ecosystem-group: "combined"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -26,7 +37,9 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-
+    patterns:
+      - "*"
+    multi-ecosystem-group: "combined"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -39,7 +52,9 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-
+    patterns:
+      - "*"
+    multi-ecosystem-group: "combined"
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
@@ -52,3 +67,6 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+    patterns:
+      - "*"
+    multi-ecosystem-group: "combined"

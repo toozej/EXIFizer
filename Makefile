@@ -11,10 +11,10 @@ IMAGE_AUTHOR = toozej
 IMAGE_NAME = exifizer
 IMAGE_TAG = latest
 
-.PHONY: all build test run local local-run local-test local-lint local-fmt update-python-version pre-reqs-install pre-commit pre-commit-install pre-commit-run clean help
+.PHONY: all build test run local local-run local-test local-lint local-fmt local-release-test get-cosign-pub-key verify update-python-version pre-reqs-install pre-commit pre-commit-install pre-commit-run clean help
 
 all: build run verify ## Run default workflow
-local: local-update-deps local-fmt local-lint local-test local-run ## Run local toolchain workflow
+local: local-update-deps local-fmt local-lint pre-commit local-test local-run ## Run local toolchain workflow
 
 build: ## Build Dockerized project
 	docker build -f $(CURDIR)/Dockerfile -t $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG) .
@@ -47,6 +47,19 @@ local-lint: ## Run linters locally (ruff + ty)
 local-fmt: ## Format code locally
 	uv run ruff format .
 
+local-release-test: ## Build assets and test goreleaser config using locally installed golang toolchain and goreleaser
+	goreleaser check
+	goreleaser build --clean --snapshot
+
+get-cosign-pub-key: ## Get python-starter Cosign public key from GitHub
+	test -f $(CURDIR)/python-starter.pub || curl --silent https://raw.githubusercontent.com/toozej/python-starter/main/python-starter.pub -O
+
+verify: get-cosign-pub-key ## Verify Docker image with Cosign
+	cosign verify \
+		--certificate-identity-regexp '^https://github.com/toozej/python-starter/.github/workflows/release.yaml@refs/tags/.*$$' \
+		--certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+		$(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
+
 update-python-version: ## Update Python version
 	@VERSION=`curl -s "https://endoflife.date/api/python.json" | jq -r '.[0].latest' | sed 's/\.[0-9]*$$//'`; \
 	echo "Updating Python to $$VERSION"; \
@@ -59,6 +72,8 @@ pre-reqs-install: ## Install pre-requisite tools for using python-starter
 pre-commit: pre-reqs-install pre-commit-install pre-commit-run ## Install and run pre-commit hooks
 
 pre-commit-install: ## Install pre-commit hooks and necessary binaries
+	# cosign
+	command -v cosign || brew install cosign || go install github.com/sigstore/cosign/v3/cmd/cosign@latest
 	# actionlint
 	command -v actionlint || brew install actionlint || go install github.com/rhysd/actionlint/cmd/actionlint@latest
 	# install and update pre-commits
@@ -75,6 +90,10 @@ pre-commit-run: ## Run pre-commit hooks against all files
 	uvx ty check
 
 clean: ## Clean up built Docker images
+	@echo "=== Cleaning up compiled binaries, container images, profiles, and demo files ==="
+	@rm -rf $(CURDIR)/dist/
+	@rm -rf $(CURDIR)/manpages/ $(CURDIR)/completions/
+	@rm -rf $(CURDIR)/venv/ $(CURDIR)/.venv/ $(CURDIR)/.pytest_cache $(CURDIR)/.ruff_cache
 	docker image rm $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 help: ## Display help text

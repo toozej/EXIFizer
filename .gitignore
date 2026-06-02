@@ -169,3 +169,8 @@ cython_debug/
 in/
 out/
 .DS_Store
+
+# cosign
+*.key
+*.sig
+*.bundle

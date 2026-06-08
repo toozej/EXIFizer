@@ -534,7 +534,8 @@ class CatalogConverter:
                     r"^\s{0,3}-\s+Filmstock\s+.+:\s*$", line
                 ):
                     flush_current()
-                    current = FilmEntry(section_path=current_section_path.copy())
+                    entry = FilmEntry(section_path=current_section_path.copy())
+                    current = entry
                     in_subentries = True
                     current_is_new_format = True
 
@@ -550,20 +551,21 @@ class CatalogConverter:
                     # Extract optional quantity like "1x Something"
                     qm = re.match(r"^(?P<qty>\d+x)\s+(?P<name>.+)$", val, flags=re.IGNORECASE)
                     if qm:
-                        current.quantity = qm.group("qty").strip()
-                        current.filmstock = qm.group("name").strip()
+                        entry.quantity = qm.group("qty").strip()
+                        entry.filmstock = qm.group("name").strip()
                     else:
-                        current.filmstock = val
+                        entry.filmstock = val
 
                     self.logger.debug(
-                        "New-format entry started: %s %s", current.quantity, current.filmstock
+                        "New-format entry started: %s %s", entry.quantity, entry.filmstock
                     )
                     continue
 
                 # Detect old-format main entry "- 1x Film..." (allow small leading indentation)
                 if re.match(r"^\s{0,3}-\s+\d+x\s+", line, flags=re.IGNORECASE):
                     flush_current()
-                    current = FilmEntry(section_path=current_section_path.copy())
+                    entry = FilmEntry(section_path=current_section_path.copy())
+                    current = entry
                     in_subentries = True
                     current_is_new_format = False
 
@@ -571,10 +573,10 @@ class CatalogConverter:
                         r"^\s{0,3}-\s+(?P<qty>\d+x)\s+(?P<name>.+)$", line, flags=re.IGNORECASE
                     )
                     if m:
-                        current.quantity = m.group("qty").strip()
-                        current.filmstock = m.group("name").strip()
+                        entry.quantity = m.group("qty").strip()
+                        entry.filmstock = m.group("name").strip()
                     self.logger.debug(
-                        "Old-format entry started: %s %s", current.quantity, current.filmstock
+                        "Old-format entry started: %s %s", entry.quantity, entry.filmstock
                     )
                     continue
 

@@ -14,7 +14,7 @@ IMAGE_TAG = latest
 .PHONY: all build test run local local-run local-test local-lint local-fmt local-release-test get-cosign-pub-key verify update-python-version pre-reqs-install pre-commit pre-commit-install pre-commit-run clean help
 
 all: build run verify ## Run default workflow
-local: local-update-deps local-fmt local-lint pre-commit local-test local-run ## Run local toolchain workflow
+local: local-update-deps local-fmt local-lint pre-commit local-test ## Run local toolchain workflow
 
 build: ## Build Dockerized project
 	docker build -f $(CURDIR)/Dockerfile -t $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG) .

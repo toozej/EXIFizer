@@ -185,6 +185,59 @@ class TestParseMarkdown:
         result = exifizer.parse_markdown(content)
         assert result[0]["FocalLength"] == "35"
 
+    def test_parse_zoom_lens_extracts_focal_length_with_mm_suffix(self):
+        content = """- Filmstock: Test Film
+- Lens: 35-70mm f/3.5
+- RollNum: 0001
+"""
+        result = exifizer.parse_markdown(content)
+        assert result[0]["FocalLength"] == "70"
+
+    def test_parse_whitespace_values_trimmed(self):
+        content = """- Filmstock:   Kodak Portra 400
+- Camera:   Canon AE-1
+- RollNum: 0001
+"""
+        result = exifizer.parse_markdown(content)
+        assert result[0]["FilmStock"] == "Kodak Portra 400"
+        assert result[0]["Camera"] == "Canon AE-1"
+
+    def test_parse_empty_optional_field_uses_default(self):
+        content = """- Filmstock: Test Film
+- ISO:
+- RollNum: 0001
+"""
+        result = exifizer.parse_markdown(content)
+        assert result[0]["ISO"] == "100"
+
+    def test_parse_missing_filmstock_uses_default(self):
+        content = """- RollNum: 0001
+- Camera: Canon AE-1
+"""
+        result = exifizer.parse_markdown(content)
+        assert result[0]["FilmStock"] == "Unknown Film"
+        assert result[0]["RollNum"] == "0001"
+
+    def test_parse_fields_out_of_order(self):
+        content = """- Filmstock: Fujifilm Superia
+- RollNum: 0002
+- ISO: 200
+"""
+        result = exifizer.parse_markdown(content)
+        assert len(result) == 1
+        assert result[0]["RollNum"] == "0002"
+        assert result[0]["FilmStock"] == "Fujifilm Superia"
+        assert result[0]["ISO"] == "200"
+
+    def test_parse_unknown_field_ignored(self):
+        content = """- Filmstock: Test Film
+- UnknownField: some value
+- RollNum: 0001
+"""
+        result = exifizer.parse_markdown(content)
+        assert "UnknownField" not in result[0]
+        assert result[0]["FilmStock"] == "Test Film"
+
     def test_parse_focal_length_no_match(self):
         content = """- Filmstock: Test Film
 - Lens: Unknown Lens
@@ -314,6 +367,11 @@ class TestIsMarkdownFile:
     def test_md_file_without_markdown_content(self, tmp_path):
         filepath = tmp_path / "test.md"
         filepath.write_text("Just plain text")
+        assert exifizer.is_markdown_file(str(filepath)) is False
+
+    def test_empty_md_file(self, tmp_path):
+        filepath = tmp_path / "test.md"
+        filepath.write_text("")
         assert exifizer.is_markdown_file(str(filepath)) is False
 
 
@@ -496,6 +554,320 @@ class TestApplyExifData:
                 exifizer.apply_exif_data(rolls, str(tmp_path))
         captured = capsys.readouterr()
         assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_filename_convention_three(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        tif_file = tmp_path / "46400009.TIF"
+        tif_file.write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_filename_convention_three_lower_extension(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        tif_file = tmp_path / "46400009.tif"
+        tif_file.write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_filename_convention_three_padded_roll(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "0010",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        jpg_file = tmp_path / "00100009.jpg"
+        jpg_file.write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_filename_convention_three_high_photo_number(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        tif_file = tmp_path / "46400036.TIF"
+        tif_file.write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_filename_convention_three_no_matching_roll(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0002"}]
+        tif_file = tmp_path / "46400009.TIF"
+        tif_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "No matching roll found" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_no_digits(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "image.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_too_few_digits(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "123.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_four_digits_only(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "1234.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_seven_digits(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "1234567.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_wrong_separator(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "0001-5.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_noncompliant_embedded_short_digits(self, tmp_path, capsys):
+        rolls = [{"RollNum": "0001"}]
+        jpg_file = tmp_path / "IMG_2024.jpg"
+        jpg_file.write_text("fake image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Could not parse roll number" in captured.out
+        assert "Processed 0 image files" in captured.out
+
+    def test_apply_exif_data_multiple_files_same_roll(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        (tmp_path / "46400001.TIF").write_text("fake image 1")
+        (tmp_path / "46400002.TIF").write_text("fake image 2")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 2 image files" in captured.out
+
+    def test_apply_exif_data_subdirectory(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        subdir = tmp_path / "roll_4640"
+        subdir.mkdir()
+        (subdir / "46400009.TIF").write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 1 image files" in captured.out
+
+    def test_apply_exif_data_uses_last_matching_roll(self, tmp_path):
+        rolls = [
+            {
+                "RollNum": "0001",
+                "FilmStock": "First Roll",
+                "ISO": "100",
+                "LoadDate": "01/01/24",
+                "Camera": "First Camera",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "First",
+                "Subject": "First",
+                "ShotLocation": "First",
+                "FilmProcessedDate": "01/02/24",
+                "DevelopedBy": "First Lab",
+            },
+            {
+                "RollNum": "0001",
+                "FilmStock": "Second Roll",
+                "ISO": "200",
+                "LoadDate": "02/01/24",
+                "Camera": "Second Camera",
+                "Lens": "35mm f/2",
+                "FocalLength": "35",
+                "Filter": "UV",
+                "Notes": "Second",
+                "Subject": "Second",
+                "ShotLocation": "Second",
+                "FilmProcessedDate": "02/02/24",
+                "DevelopedBy": "Second Lab",
+            },
+        ]
+        (tmp_path / "0001_5.jpg").write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                with patch("exifizer.write_exif_file") as mock_write:
+                    exifizer.apply_exif_data(rolls, str(tmp_path))
+        used_roll = mock_write.call_args[0][0]
+        assert used_roll["FilmStock"] == "Second Roll"
+        assert used_roll["ISO"] == "200"
+
+    def test_apply_exif_data_case_insensitive_extensions(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        (tmp_path / "46400001.JPEG").write_text("fake image")
+        (tmp_path / "46400002.Tiff").write_text("fake image")
+        (tmp_path / "46400003.TIF").write_text("fake image")
+        (tmp_path / "46400004.jpg").write_text("fake image")
+        with patch("exifizer.get_original_make_model", return_value=("Canon", "Scanner")):
+            with patch("exifizer.run_exiftool_cmd"):
+                exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 4 image files" in captured.out
+
+    def test_apply_exif_data_ignores_non_image_files(self, tmp_path, capsys):
+        rolls = [
+            {
+                "RollNum": "4640",
+                "FilmStock": "Test",
+                "ISO": "400",
+                "LoadDate": "01/15/24",
+                "Camera": "Canon AE-1",
+                "Lens": "50mm f/1.4",
+                "FocalLength": "50",
+                "Filter": "None",
+                "Notes": "Test",
+                "Subject": "Portrait",
+                "ShotLocation": "NYC",
+                "FilmProcessedDate": "01/20/24",
+                "DevelopedBy": "Lab",
+            }
+        ]
+        (tmp_path / "46400009.png").write_text("fake image")
+        (tmp_path / "46400009.txt").write_text("not an image")
+        exifizer.apply_exif_data(rolls, str(tmp_path))
+        captured = capsys.readouterr()
+        assert "Processed 0 image files" in captured.out
 
     def test_apply_exif_data_unmatched_filename(self, tmp_path, capsys):
         rolls = [{"RollNum": "0001"}]

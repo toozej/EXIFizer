@@ -307,8 +307,11 @@ def apply_exif_data(rolls, image_directory):
                 # file naming conventions:
                 # 1. `0000XXXX000YY.jpg` where XXXX is a 4-digit RollNum, and YY is a zero-padded PhotoNum (1-36ish)
                 # 2. `XXXX_YY.tif` where XXXX is a 4-digit RollNum, and YY is a non-zero-padded PhotoNum (1-36ish)
+                # 3. `46400009.TIF` where XXXX is a 4-digit RollNum and YYYY is a zero-padded PhotoNum (1-36-ish)
                 if file.lower().endswith((".jpg", ".jpeg", ".tiff", ".tif")):
-                    roll_num_match = re.search(r"(\d{8})(\d{4})|(\d{4})_(\d{1,2})", file)
+                    roll_num_match = re.search(
+                        r"(\d{8})(\d{4})|(\d{4})_(\d{1,2})|(\d{4})(\d{4})", file
+                    )
                     if not roll_num_match:
                         print(f"Warning: Could not parse roll number from filename: {file}")
                         continue
@@ -325,6 +328,12 @@ def apply_exif_data(rolls, image_directory):
                             roll_num = roll_num_match.group(3).strip().zfill(4)
                             photo_number = (
                                 int(roll_num_match.group(4)) if roll_num_match.group(4) else 1
+                            )
+                        # handle file naming convention #3
+                        elif roll_num_match.group(5):
+                            roll_num = roll_num_match.group(5).strip().zfill(4)
+                            photo_number = (
+                                int(roll_num_match.group(6)) if roll_num_match.group(6) else 1
                             )
                         else:
                             print(f"Warning: Unknown file naming convention for file {file}")

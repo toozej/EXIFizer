@@ -27,7 +27,7 @@ run: ## Run Dockerized project
 	docker run --rm --name $(IMAGE_NAME) $(IMAGE_AUTHOR)/$(IMAGE_NAME):$(IMAGE_TAG)
 
 local-update-deps: ## Update dependencies locally
-	uv sync --all-groups
+	uv sync --all-groups --upgrade
 
 local-install: ## Install python-starter CLI locally via uv (builds + installs)
 	uv tool install --force-reinstall .

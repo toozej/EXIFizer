@@ -50,7 +50,7 @@ lint = [
   "bandit>=1.7.0",
   "vulture>=2.14",
   "pyupgrade>=3.21.0",
-  "ty>=0.0.51",
+  "ty>=0.0.55",
 ]
 dev = [
   "pre-commit>=4.6.0",

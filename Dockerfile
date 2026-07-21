@@ -4,7 +4,9 @@ FROM python:3.14.6-slim
 
 RUN pip install --upgrade pip && \
     apt-get update -qq && \
-    apt-get install -y make build-essential libimage-exiftool-perl
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends make build-essential libimage-exiftool-perl && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN useradd -ms /bin/bash appuser
 USER appuser

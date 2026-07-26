@@ -452,12 +452,14 @@ class TestGetOriginalMakeModel:
 
 class TestMain:
     def test_main_missing_manifest(self, capsys):
-        with pytest.raises(SystemExit) as exc_info:
-            with patch(
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch(
                 "sys.argv",
                 ["exifizer", "--film-manifest", "/nonexistent.md", "--images-dir", "/tmp"],
-            ):
-                exifizer.main()
+            ),
+        ):
+            exifizer.main()
         assert exc_info.value.code == 1
         captured = capsys.readouterr()
         assert "does not exist" in captured.out
@@ -465,34 +467,40 @@ class TestMain:
     def test_main_missing_images_dir(self, capsys, tmp_path):
         manifest = tmp_path / "test.md"
         manifest.write_text("# Test\n- Filmstock: Test")
-        with pytest.raises(SystemExit) as exc_info:
-            with patch(
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch(
                 "sys.argv",
                 ["exifizer", "--film-manifest", str(manifest), "--images-dir", "/nonexistent/dir"],
-            ):
-                exifizer.main()
+            ),
+        ):
+            exifizer.main()
         assert exc_info.value.code == 2
 
     def test_main_non_markdown_file(self, capsys, tmp_path):
         txt_file = tmp_path / "test.txt"
         txt_file.write_text("not markdown")
-        with pytest.raises(SystemExit) as exc_info:
-            with patch(
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch(
                 "sys.argv",
                 ["exifizer", "--film-manifest", str(txt_file), "--images-dir", str(tmp_path)],
-            ):
-                exifizer.main()
+            ),
+        ):
+            exifizer.main()
         assert exc_info.value.code == 1
 
     def test_main_empty_manifest(self, capsys, tmp_path):
         manifest = tmp_path / "test.md"
         manifest.write_text("# Empty\nNo rolls here")
-        with pytest.raises(SystemExit) as exc_info:
-            with patch(
+        with (
+            pytest.raises(SystemExit) as exc_info,
+            patch(
                 "sys.argv",
                 ["exifizer", "--film-manifest", str(manifest), "--images-dir", str(tmp_path)],
-            ):
-                exifizer.main()
+            ),
+        ):
+            exifizer.main()
         assert exc_info.value.code == 3
 
 

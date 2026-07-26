@@ -194,9 +194,9 @@ class CatalogConverter:
         count = 0
         for raw in content.splitlines():
             line = raw.rstrip("\n")
-            if re.match(r"^\s{0,3}-\s+Filmstock(?::|\s+.+:\s*$)", line):
-                count += 1
-            elif re.match(r"^\s{0,3}-\s+\d+x\s+", line, flags=re.IGNORECASE):
+            if re.match(r"^\s{0,3}-\s+Filmstock(?::|\s+.+:\s*$)", line) or re.match(
+                r"^\s{0,3}-\s+\d+x\s+", line, flags=re.IGNORECASE
+            ):
                 count += 1
         return count
 

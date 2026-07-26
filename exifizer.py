@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
+import multiprocessing
 import os
 import re
 import subprocess
 import sys
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import multiprocessing
+from datetime import datetime
 
 VERBOSE = False
 
@@ -408,7 +408,7 @@ def apply_exif_data(rolls, image_directory):
                             f"-Keywords=Roll {matching_roll['RollNum']}",
                             # Copyright and creator info (shows in Google Photos)
                             "-Artist=James Tooze",
-                            f"-Copyright=© {str(datetime.today().year)} James Tooze",
+                            f"-Copyright=© {datetime.today().year!s} James Tooze",
                             # Film-specific metadata in XMP namespace
                             f"-XMP-AnalogueData:Filter={matching_roll['Filter']}",
                             f"-XMP-AnalogueData:FilmStock={matching_roll['FilmStock']}",

@@ -61,7 +61,20 @@ target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]
-ignore = ["E501", "E203", "E231", "E722", "C901"]
+ignore = [
+  "B005",   # Existing zero-padding normalization intentionally uses lstrip.
+  "BLE001", # Top-level CLI and parser boundaries report unexpected failures.
+  "C901",
+  "DTZ002", # EXIF copyright year is a local calendar year.
+  "DTZ007", # EXIF dates are deliberately timezone-free.
+  "E203",
+  "E231",
+  "E501",
+  "E722",
+  "PIE810", # Keep explicit prefix checks readable at parsing call sites.
+  "SIM103",
+  "SIM117", # Nested mocks make individual test setup scopes clear.
+]
 
 [tool.ruff.format]
 quote-style = "double"

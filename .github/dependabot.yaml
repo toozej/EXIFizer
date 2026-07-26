@@ -1,72 +1,72 @@
 ---
 version: 2
 multi-ecosystem-groups:
-  combined:
-    schedule:
-      interval: "weekly"
-    labels:
-      - "dependencies"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
+    combined:
+        schedule:
+            interval: weekly
+        labels:
+            - dependencies
+        commit-message:
+            prefix: chore
+            include: scope
 updates:
-  - package-ecosystem: "uv"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    labels:
-      - "dependencies"
-      - "uv"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    patterns:
-      - "*"
-    multi-ecosystem-group: "combined"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    labels:
-      - "dependencies"
-      - "github-actions"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    patterns:
-      - "*"
-    multi-ecosystem-group: "combined"
-  - package-ecosystem: "docker"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    labels:
-      - "dependencies"
-      - "docker"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    patterns:
-      - "*"
-    multi-ecosystem-group: "combined"
-  - package-ecosystem: "devcontainers"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-    cooldown:
-      default-days: 7
-    labels:
-      - "dependencies"
-      - "devcontainers"
-    commit-message:
-      prefix: "chore"
-      include: "scope"
-    patterns:
-      - "*"
-    multi-ecosystem-group: "combined"
+    - package-ecosystem: uv
+      directory: /
+      schedule:
+          interval: weekly
+      cooldown:
+          default-days: 7
+      labels:
+          - dependencies
+          - uv
+      commit-message:
+          prefix: chore
+          include: scope
+      patterns:
+          - '*'
+      multi-ecosystem-group: combined
+    - package-ecosystem: github-actions
+      directory: /
+      schedule:
+          interval: weekly
+      cooldown:
+          default-days: 7
+      labels:
+          - dependencies
+          - github-actions
+      commit-message:
+          prefix: chore
+          include: scope
+      patterns:
+          - '*'
+      multi-ecosystem-group: combined
+    - package-ecosystem: docker
+      directory: /
+      schedule:
+          interval: weekly
+      cooldown:
+          default-days: 7
+      labels:
+          - dependencies
+          - docker
+      commit-message:
+          prefix: chore
+          include: scope
+      patterns:
+          - '*'
+      multi-ecosystem-group: combined
+    - package-ecosystem: devcontainers
+      directory: /
+      schedule:
+          interval: weekly
+      cooldown:
+          default-days: 7
+      labels:
+          - dependencies
+          - devcontainers
+      commit-message:
+          prefix: chore
+          include: scope
+      patterns:
+          - '*'
+      multi-ecosystem-group: combined

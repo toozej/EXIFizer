@@ -12,61 +12,51 @@ multi-ecosystem-groups:
 updates:
     - package-ecosystem: uv
       directory: /
-      schedule:
-          interval: weekly
       cooldown:
           default-days: 7
       labels:
           - dependencies
           - uv
-      commit-message:
-          prefix: chore
-          include: scope
       patterns:
           - '*'
       multi-ecosystem-group: combined
     - package-ecosystem: github-actions
       directory: /
-      schedule:
-          interval: weekly
       cooldown:
           default-days: 7
       labels:
           - dependencies
           - github-actions
-      commit-message:
-          prefix: chore
-          include: scope
       patterns:
           - '*'
       multi-ecosystem-group: combined
     - package-ecosystem: docker
       directory: /
-      schedule:
-          interval: weekly
       cooldown:
           default-days: 7
       labels:
           - dependencies
           - docker
-      commit-message:
-          prefix: chore
-          include: scope
       patterns:
           - '*'
       multi-ecosystem-group: combined
     - package-ecosystem: devcontainers
       directory: /
-      schedule:
-          interval: weekly
       cooldown:
           default-days: 7
       labels:
           - dependencies
           - devcontainers
-      commit-message:
-          prefix: chore
-          include: scope
+      patterns:
+          - '*'
+      multi-ecosystem-group: combined
+    - package-ecosystem: pre-commit
+      directory: /
+      cooldown:
+          default-days: 7
+      labels:
+          - dependencies
+          - pre-commit
       patterns:
           - '*'
       multi-ecosystem-group: combined

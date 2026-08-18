@@ -2,7 +2,7 @@
 # and enable modern packaging (PEP 621).
 
 [build-system]
-requires = ["hatchling>=1.31.0"]
+requires = ["hatchling>=1.32.0"]
 build-backend = "hatchling.build"
 
 [project]
@@ -50,10 +50,10 @@ lint = [
   "bandit>=1.7.0",
   "vulture>=2.14",
   "pyupgrade>=3.21.0",
-  "ty>=0.0.69",
+  "ty>=0.0.70",
 ]
 dev = [
-  "pre-commit>=4.6.0",
+  "pre-commit>=4.6.2",
 ]
 
 [tool.ruff]
